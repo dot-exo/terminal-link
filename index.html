@@ -50,6 +50,14 @@
           char = 0;
           setTimeout(type, 400);
         }
+      } else {
+        // restart after short delay
+        setTimeout(() => {
+          terminal.innerHTML = ""; // clear old text
+          line = 0;
+          char = 0;
+          type();
+        }, 2000);
       }
     }
     type();
