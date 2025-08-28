@@ -2,13 +2,22 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Fake Terminal</title>
+  <title>Hacker Terminal</title>
   <style>
     body {
-      background: black;
+      margin: 0;
+      height: 100vh;
+      background: url('https://i.ibb.co/TrdDfXc/hacker-bg.jpg') no-repeat center center fixed;
+      background-size: cover;
       color: #00ff00;
       font-family: monospace;
       padding: 20px;
+    }
+    #overlay {
+      background: rgba(0, 0, 0, 0.8); /* dark overlay for readability */
+      height: 100%;
+      padding: 20px;
+      overflow-y: auto;
     }
     #terminal {
       white-space: pre-wrap;
@@ -23,31 +32,37 @@
     @keyframes blink {
       50% { background: transparent; }
     }
+    .command { color: #00ff00; }   /* green */
+    .output { color: #00ffff; }    /* cyan */
+    .error { color: #ff3333; }     /* red */
   </style>
 </head>
 <body>
-  <div id="terminal"></div><div class="cursor"></div>
+  <div id="overlay">
+    <div id="terminal"></div><div class="cursor"></div>
+  </div>
 
   <script>
     const terminal = document.getElementById("terminal");
 
-    // command + output pairs
+    // command + output pairs with types
     const commandPool = [
-      { cmd: "ping server...", out: "reply from 192.168.1.1: success" },
-      { cmd: "connecting to database...", out: "connection established ✅" },
-      { cmd: "scanning ports...", out: "22 open, 80 open, 443 open" },
-      { cmd: "decrypting file...", out: "decryption complete" },
-      { cmd: "upload payload...", out: "upload success" },
-      { cmd: "bypassing firewall...", out: "firewall disabled" },
-      { cmd: "checking user credentials...", out: "user dot-exo authenticated" },
-      { cmd: "fetching system info...", out: "OS: Ubuntu 22.04, RAM: 8GB" },
-      { cmd: "compiling source...", out: "build success, 0 errors" },
-      { cmd: "establishing secure tunnel...", out: "tunnel active 🔒" }
+      { cmd: "$ ping server...", out: "reply from 192.168.1.1: success", type: "output" },
+      { cmd: "$ connecting to database...", out: "connection established ✅", type: "output" },
+      { cmd: "$ scanning ports...", out: "22 open, 80 open, 443 open", type: "output" },
+      { cmd: "$ decrypting file...", out: "decryption complete", type: "output" },
+      { cmd: "$ upload payload...", out: "upload success", type: "output" },
+      { cmd: "$ bypassing firewall...", out: "firewall disabled", type: "error" },
+      { cmd: "$ checking user credentials...", out: "user dot-exo authenticated", type: "output" },
+      { cmd: "$ fetching system info...", out: "OS: Ubuntu 22.04, RAM: 8GB", type: "output" },
+      { cmd: "$ compiling source...", out: "build success, 0 errors", type: "output" },
+      { cmd: "$ establishing secure tunnel...", out: "tunnel active 🔒", type: "output" }
     ];
 
     let script = []; 
     let line = 0, char = 0;
     let currentText = "";
+    let currentClass = "output";
 
     function newSession() {
       // choose 4–6 random command+output pairs
@@ -55,27 +70,36 @@
       const count = Math.floor(Math.random() * 3) + 4;
       for (let i = 0; i < count; i++) {
         const pair = commandPool[Math.floor(Math.random() * commandPool.length)];
-        script.push(pair.cmd);
-        script.push("  " + pair.out); // indent output
+        script.push({ text: pair.cmd, class: "command" });
+        script.push({ text: "  " + pair.out, class: pair.type });
       }
       line = 0;
       char = 0;
       terminal.innerHTML = ""; // clear screen
-      currentText = script[line];
+      currentText = script[line].text;
+      currentClass = script[line].class;
       type();
     }
 
     function type() {
       if (line < script.length) {
         if (char < currentText.length) {
-          terminal.innerHTML += currentText[char++];
-          setTimeout(type, 50);
+          let span = document.querySelector("#line" + line);
+          if (!span) {
+            span = document.createElement("span");
+            span.id = "line" + line;
+            span.className = currentClass;
+            terminal.appendChild(span);
+          }
+          span.innerHTML += currentText[char++];
+          setTimeout(type, 40);
         } else {
           terminal.innerHTML += "\n";
           line++;
           char = 0;
           if (line < script.length) {
-            currentText = script[line];
+            currentText = script[line].text;
+            currentClass = script[line].class;
             setTimeout(type, 400);
           } else {
             setTimeout(newSession, 2000); // restart
