@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Hacker Prank Terminal</title>
+  <title>Horror Hacker Prank</title>
   <style>
     body {
       margin: 0;
@@ -10,55 +10,71 @@
       background: black;
       color: #00ff00;
       font-family: monospace;
-      padding: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
       overflow: hidden;
     }
-    #terminal {
+    #terminal-container {
+      text-align: left;
+      font-size: 1.3rem;
+      max-width: 80%;
       white-space: pre-wrap;
-    }
-    .input-line {
-      display: inline;
     }
     .cursor {
       display: inline-block;
       background: #00ff00;
-      width: 10px;
-      height: 18px;
+      width: 12px;
+      height: 22px;
+      margin-left: 2px;
       animation: blink 0.8s infinite;
     }
     @keyframes blink {
       50% { background: transparent; }
     }
-
-    /* blackout + scare screen */
+    /* blackout jump scare */
     #blackout {
       display: none;
       position: fixed;
       top: 0; left: 0;
       width: 100%; height: 100%;
       background: black;
-      color: white;
-      font-family: monospace;
+      color: red;
+      font-family: "Courier New", monospace;
       z-index: 999;
       display: flex;
       align-items: center;
       justify-content: center;
       text-align: center;
+      flex-direction: column;
     }
     .scary {
-      font-size: 5rem;   /* HUGE text */
+      font-size: 5rem;
       font-weight: bold;
-      animation: flicker 0.1s infinite alternate;
+      text-shadow: 0 0 20px red, 0 0 40px darkred;
+      animation: flicker 0.12s infinite alternate;
     }
     @keyframes flicker {
       0% { opacity: 1; }
-      100% { opacity: 0.7; }
+      100% { opacity: 0.6; }
+    }
+    .subtext {
+      margin-top: 20px;
+      font-size: 1.5rem;
+      color: white;
+      opacity: 0.8;
     }
   </style>
 </head>
 <body>
-  <div id="terminal"></div><div class="cursor"></div>
-  <div id="blackout"><div class="scary">⚠️ YOUR DEVICE HAS BEEN COMPROMISED ⚠️</div></div>
+  <div id="terminal-container">
+    <div id="terminal"></div><div class="cursor"></div>
+  </div>
+
+  <div id="blackout">
+    <div class="scary">⚠️ YOUR DEVICE HAS BEEN COMPROMISED ⚠️</div>
+    <div class="subtext">Shutting down...</div>
+  </div>
 
   <script>
     const terminal = document.getElementById("terminal");
@@ -74,18 +90,17 @@
         terminal.innerHTML += `\n$ ${questions[currentQuestion]}\n> `;
         inputBuffer = "";
       } else {
-        // after last answer, trigger blackout prank
+        // after answering last question → blackout
         setTimeout(() => {
           document.body.style.background = "black";
-          terminal.style.display = "none";
-          cursor.style.display = "none";
+          document.getElementById("terminal-container").style.display = "none";
           blackout.style.display = "flex";
-        }, 2000);
+        }, 1500);
       }
     }
 
     document.addEventListener("keydown", (e) => {
-      if (blackout.style.display === "flex") return; // ignore input after prank
+      if (blackout.style.display === "flex") return; // ignore after scare
 
       if (e.key === "Enter") {
         terminal.innerHTML += inputBuffer + "\n";
@@ -100,7 +115,7 @@
       }
     });
 
-    // start first question
+    // start
     askQuestion();
   </script>
 </body>
