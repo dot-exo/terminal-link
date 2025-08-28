@@ -32,7 +32,7 @@
     @keyframes blink {
       50% { background: transparent; }
     }
-    /* blackout jump scare */
+    /* blackout screen */
     #blackout {
       display: none;
       position: fixed;
@@ -49,7 +49,7 @@
       flex-direction: column;
     }
     .scary {
-      font-size: 5rem;
+      font-size: 4rem;
       font-weight: bold;
       text-shadow: 0 0 20px red, 0 0 40px darkred;
       animation: flicker 0.12s infinite alternate;
@@ -58,11 +58,25 @@
       0% { opacity: 1; }
       100% { opacity: 0.6; }
     }
-    .subtext {
-      margin-top: 20px;
-      font-size: 1.5rem;
-      color: white;
-      opacity: 0.8;
+    .options {
+      margin-top: 30px;
+      display: flex;
+      gap: 30px;
+    }
+    .btn {
+      padding: 15px 30px;
+      font-size: 1.2rem;
+      font-weight: bold;
+      border: 2px solid red;
+      background: transparent;
+      color: red;
+      cursor: pointer;
+      transition: 0.3s;
+    }
+    .btn:hover {
+      background: red;
+      color: black;
+      text-shadow: 0 0 10px white;
     }
   </style>
 </head>
@@ -73,7 +87,10 @@
 
   <div id="blackout">
     <div class="scary">⚠️ YOUR DEVICE HAS BEEN COMPROMISED ⚠️</div>
-    <div class="subtext">Shutting down...</div>
+    <div class="options">
+      <button class="btn" onclick="exitLink()">Erase Data</button>
+      <button class="btn" onclick="exitLink()">Surrender Access</button>
+    </div>
   </div>
 
   <script>
@@ -90,17 +107,17 @@
         terminal.innerHTML += `\n$ ${questions[currentQuestion]}\n> `;
         inputBuffer = "";
       } else {
-        // after answering last question → blackout
+        // trigger blackout prank
         setTimeout(() => {
-          document.body.style.background = "black";
           document.getElementById("terminal-container").style.display = "none";
+          cursor.style.display = "none";
           blackout.style.display = "flex";
         }, 1500);
       }
     }
 
     document.addEventListener("keydown", (e) => {
-      if (blackout.style.display === "flex") return; // ignore after scare
+      if (blackout.style.display === "flex") return;
 
       if (e.key === "Enter") {
         terminal.innerHTML += inputBuffer + "\n";
@@ -115,7 +132,12 @@
       }
     });
 
-    // start
+    // redirect link after clicking option
+    function exitLink() {
+      window.location.href = "https://your-link-here.com"; 
+    }
+
+    // start first question
     askQuestion();
   </script>
 </body>
