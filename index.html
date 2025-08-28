@@ -7,21 +7,37 @@
     body {
       margin: 0;
       height: 100vh;
-      background: url('https://i.ibb.co/TrdDfXc/hacker-bg.jpg') no-repeat center center fixed;
-      background-size: cover;
-      color: #00ff00;
+      background: black;
+      overflow: hidden;
       font-family: monospace;
-      padding: 20px;
     }
-    #overlay {
-      background: rgba(0, 0, 0, 0.8); /* dark overlay for readability */
+
+    /* Matrix canvas behind */
+    #matrixCanvas {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
       height: 100%;
+      z-index: 0;
+      background: black;
+    }
+
+    /* Terminal overlay */
+    #overlay {
+      position: relative;
+      z-index: 1;
+      background: rgba(0, 0, 0, 0.75);
+      color: #00ff00;
       padding: 20px;
+      height: 100%;
       overflow-y: auto;
     }
+
     #terminal {
       white-space: pre-wrap;
     }
+
     .cursor {
       display: inline-block;
       background: #00ff00;
@@ -32,20 +48,60 @@
     @keyframes blink {
       50% { background: transparent; }
     }
+
+    /* Colors */
     .command { color: #00ff00; }   /* green */
     .output { color: #00ffff; }    /* cyan */
     .error { color: #ff3333; }     /* red */
   </style>
 </head>
 <body>
+  <!-- Matrix background -->
+  <canvas id="matrixCanvas"></canvas>
+
+  <!-- Terminal overlay -->
   <div id="overlay">
     <div id="terminal"></div><div class="cursor"></div>
   </div>
 
   <script>
+    // ---------------- Matrix Effect ----------------
+    const canvas = document.getElementById("matrixCanvas");
+    const ctx = canvas.getContext("2d");
+
+    canvas.height = window.innerHeight;
+    canvas.width = window.innerWidth;
+
+    const letters = "アァイィウヴエェオカガキギクグケゲコゴサザシジスズセゼソゾタダチッヂヅテデトドナニヌネノハバパヒビピフブプヘベペホボポマミムメモヤユヨラリルレロワヲンABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+    const lettersArr = letters.split("");
+
+    const fontSize = 14;
+    const columns = canvas.width / fontSize;
+    const drops = [];
+
+    for (let x = 0; x < columns; x++) drops[x] = 1;
+
+    function drawMatrix() {
+      ctx.fillStyle = "rgba(0, 0, 0, 0.05)";
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      ctx.fillStyle = "#0F0"; // green
+      ctx.font = fontSize + "px monospace";
+
+      for (let i = 0; i < drops.length; i++) {
+        const text = lettersArr[Math.floor(Math.random() * lettersArr.length)];
+        ctx.fillText(text, i * fontSize, drops[i] * fontSize);
+
+        if (drops[i] * fontSize > canvas.height && Math.random() > 0.975) drops[i] = 0;
+        drops[i]++;
+      }
+    }
+
+    setInterval(drawMatrix, 33);
+
+    // ---------------- Fake Terminal ----------------
     const terminal = document.getElementById("terminal");
 
-    // command + output pairs with types
     const commandPool = [
       { cmd: "$ ping server...", out: "reply from 192.168.1.1: success", type: "output" },
       { cmd: "$ connecting to database...", out: "connection established ✅", type: "output" },
@@ -65,7 +121,6 @@
     let currentClass = "output";
 
     function newSession() {
-      // choose 4–6 random command+output pairs
       script = [];
       const count = Math.floor(Math.random() * 3) + 4;
       for (let i = 0; i < count; i++) {
@@ -75,7 +130,7 @@
       }
       line = 0;
       char = 0;
-      terminal.innerHTML = ""; // clear screen
+      terminal.innerHTML = "";
       currentText = script[line].text;
       currentClass = script[line].class;
       type();
@@ -102,13 +157,12 @@
             currentClass = script[line].class;
             setTimeout(type, 400);
           } else {
-            setTimeout(newSession, 2000); // restart
+            setTimeout(newSession, 2000);
           }
         }
       }
     }
 
-    // start first session
     newSession();
   </script>
 </body>
